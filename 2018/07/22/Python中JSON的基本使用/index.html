@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式。Python3 中可以使用 json 模块来对 JSON 数据进行编解码，它主要提供了四个方法： dumps、dump、loads、load。 dump和dumpsdump和dumps对python对象进行序列化。将一个Python对象进行JSON格式的编码。 dump函数：1json.dump(obj">
+<meta name="keywords" content="Python,JSON">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python中JSON的基本使用">
+<meta property="og:url" content="https://whjkm.github.io/2018/07/22/Python中JSON的基本使用/index.html">
+<meta property="og:site_name" content="Mars">
+<meta property="og:description" content="JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式。Python3 中可以使用 json 模块来对 JSON 数据进行编解码，它主要提供了四个方法： dumps、dump、loads、load。 dump和dumpsdump和dumps对python对象进行序列化。将一个Python对象进行JSON格式的编码。 dump函数：1json.dump(obj">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-07-22T14:28:15.269Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python中JSON的基本使用">
+<meta name="twitter:description" content="JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式。Python3 中可以使用 json 模块来对 JSON 数据进行编解码，它主要提供了四个方法： dumps、dump、loads、load。 dump和dumpsdump和dumps对python对象进行序列化。将一个Python对象进行JSON格式的编码。 dump函数：1json.dump(obj">
+
+
+
+
+
+
+  <link rel="canonical" href="https://whjkm.github.io/2018/07/22/Python中JSON的基本使用/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Python中JSON的基本使用 | Mars</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Mars</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://whjkm.github.io/2018/07/22/Python中JSON的基本使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Para">
+      <meta itemprop="description" content="记录生活和学习的点滴">
+      <meta itemprop="image" content="http://onmalbkeh.bkt.clouddn.com/20170305175657_GF3um.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mars">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python中JSON的基本使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-22 22:27:22 / 修改时间：22:28:15" itemprop="dateCreated datePublished" datetime="2018-07-22T22:27:22+08:00">2018-07-22</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/22/Python中JSON的基本使用/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/07/22/Python中JSON的基本使用/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon"
+            >
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式。Python3 中可以使用 json 模块来对 JSON 数据进行编解码，它主要提供了四个方法： <code>dumps</code>、<code>dump</code>、<code>loads</code>、<code>load</code>。</p>
+<h2 id="dump和dumps"><a href="#dump和dumps" class="headerlink" title="dump和dumps"></a>dump和dumps</h2><p><code>dump</code>和<code>dumps</code>对<code>python</code>对象进行序列化。将一个<code>Python</code>对象进行<code>JSON</code>格式的编码。</p>
+<h3 id="dump函数："><a href="#dump函数：" class="headerlink" title="dump函数："></a>dump函数：</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">json.dump(obj, fp, *, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br></pre></td></tr></table></figure>
+<p><code>obj</code>: 表示是要序列化的对象。</p>
+<p><code>fp</code>: 文件描述符，将序列化的str保存到文件中。json模块总是生成str对象，而不是字节对象；因此，fp.write（）必须支持str输入。</p>
+<p><code>skipkeys</code>: 默认为<code>False</code>,如果skipkeys<code>True</code>,（默认值：False），则将跳过不是基本类型（str，int，float，bool，None）的dict键，不会引发<code>TypeError</code>。</p>
+<p><code>ensure_ascii</code>: 默认值为<code>True</code>,能将所有传入的非ASCII字符转义输出。如果<code>ensure_ascii</code>为<code>False</code>，则这些字符将按原样输出。</p>
+<p><code>check_circular</code>:默认值为<code>True</code>,如果<code>check_circular</code>为<code>False</code>，则将跳过对容器类型的循环引用检查，循环引用将导致<code>OverflowError</code>。</p>
+<p><code>allow_nan</code>: 默认值为<code>True</code>,如果<code>allow_nan</code>为<code>False</code>，则严格遵守JSON规范,序列化超出范围的浮点值（nan，inf，-inf）会引发<code>ValueError</code>。 如果<code>allow_nan</code>为<code>True</code>,则将使用它们的<code>JavaScript</code>等效项（NaN，Infinity，-Infinity）。</p>
+<p><code>indent</code>:  设置缩进格式，默认值为<code>None</code>,选择的是最紧凑的表示。如果<code>indent</code>是非负整数或字符串，那么JSON数组元素和对象成员将使用该缩进级别进行输入；<code>indent</code>为0,负数或“”仅插入换行符；<code>indent</code>使用正整数缩进多个空格；如果<code>indent</code>是一个字符串（例如“\t”），则该字符串用于缩进每个级别。</p>
+<p><code>separators</code>: 去除分隔符后面的空格，默认值为<code>None</code>,如果指定，则分隔符应为（item_separator，key_separator）元组。如果缩进为<code>None</code>，则默认为（’，’，’：’）;要获得最紧凑的JSON表示，可以指定（’，’，’:’）以消除空格。</p>
+<p><code>default</code>: 默认值为<code>None</code>,如果指定，则<code>default</code>应该是为无法以其他方式序列化的对象调用的函数。它应返回对象的JSON可编码版本或引发<code>TypeError</code>。如果未指定，则引发<code>TypeError</code>。</p>
+<p><code>sort_keys</code>: 默认值为<code>False</code>,如果<code>sort_keys</code>为<code>True</code>，则字典的输出将按键值排序。</p>
+<h3 id="dumps函数："><a href="#dumps函数：" class="headerlink" title="dumps函数："></a>dumps函数：</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">json.dumps(obj, *, skipkeys=<span class="keyword">False</span>, ensure_ascii=<span class="keyword">True</span>, check_circular=<span class="keyword">True</span>, allow_nan=<span class="keyword">True</span>, cls=<span class="keyword">None</span>, indent=<span class="keyword">None</span>, separators=<span class="keyword">None</span>, default=<span class="keyword">None</span>, sort_keys=<span class="keyword">False</span>, **kw)</span><br></pre></td></tr></table></figure>
+<p><code>dumps</code>函数不需要传文件描述符，其他的参数和<code>dump</code>函数的一样。</p>
+<h2 id="load和loads"><a href="#load和loads" class="headerlink" title="load和loads"></a>load和loads</h2><p><code>load</code>和<code>loads</code>反序列化方法,将<code>json</code>格式数据解码为<code>python</code>对象。</p>
+<h3 id="load函数："><a href="#load函数：" class="headerlink" title="load函数："></a>load函数：</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">json.load(fp, *, cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, **kw)</span><br></pre></td></tr></table></figure>
+<p><code>fp</code>: 文件描述符，将fp（.read（）支持包含JSON文档的文本文件或二进制文件）反序列化为Python对象。</p>
+<p><code>object_hook</code>: 默认值为<code>None</code>,<code>object_hook</code>是一个可选函数，此功能可用于实现自定义解码器。指定一个函数，该函数负责把反序列化后的基本类型对象转换成自定义类型的对象。</p>
+<p><code>parse_float</code>: 默认值为<code>None</code>,如果指定了<code>parse_float</code>，用来对<code>JSON</code> float字符串进行解码,这可用于为<code>JSON</code>浮点数使用另一种数据类型或解析器。</p>
+<p><code>parse_int</code>: 默认值为<code>None</code>,如果指定了<code>parse_int</code>，用来对<code>JSON</code> int字符串进行解码,这可以用于为JSON整数使用另一种数据类型或解析器。</p>
+<p><code>parse_constant</code>:默认值为<code>None</code>,如果指定了<code>parse_constant</code>,对<code>-Infinity</code>,<code>Infinity</code>,<code>NaN</code>字符串进行调用。如果遇到了无效的<code>JSON</code>符号，会引发异常。</p>
+<p>如果进行反序列化（解码）的数据不是一个有效的<code>JSON</code>文档，将会引发 <code>JSONDecodeError</code>异常。</p>
+<h3 id="loads函数："><a href="#loads函数：" class="headerlink" title="loads函数："></a>loads函数：</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">json.loads(s, *, encoding=<span class="keyword">None</span>, cls=<span class="keyword">None</span>, object_hook=<span class="keyword">None</span>, parse_float=<span class="keyword">None</span>, parse_int=<span class="keyword">None</span>, parse_constant=<span class="keyword">None</span>, object_pairs_hook=<span class="keyword">None</span>, **kw)</span><br></pre></td></tr></table></figure>
+<p><code>s</code>: 将s（包含JSON文档的str，bytes或bytearray实例）反序列化为Python对象。<br><code>encoding</code>: 指定一个编码的格式。<br><code>loads</code>也不需要文件描述符，其他参数的含义和<code>load</code>函数的一致。</p>
+<h2 id="格式转化表"><a href="#格式转化表" class="headerlink" title="格式转化表"></a>格式转化表</h2><p><code>JSON</code>中的数据格式和<code>Python</code>中的数据格式转化关系如下：<br>| JSON | Python|<br>| —–| —- |<br>| object | dict|<br>| array  | list|<br>|string     | str   |<br>|number (int)|    int|<br>|number (real)|    float|<br>|true|    True|<br>|false|    False|<br>|null|    None|</p>
+<h2 id="实例："><a href="#实例：" class="headerlink" title="实例："></a>实例：</h2><h3 id="dump和dumps-1"><a href="#dump和dumps-1" class="headerlink" title="dump和dumps"></a>dump和dumps</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="comment"># dumps可以格式化所有的基本数据类型为字符串</span></span><br><span class="line">data1 = json.dumps([])         <span class="comment"># 列表</span></span><br><span class="line">print(data1, type(data1))</span><br><span class="line">data2 = json.dumps(<span class="number">2</span>)          <span class="comment"># 数字</span></span><br><span class="line">print(data2, type(data2))</span><br><span class="line">data3 = json.dumps(<span class="string">'3'</span>)        <span class="comment"># 字符串</span></span><br><span class="line">print(data3, type(data3))</span><br><span class="line">dict = &#123;<span class="string">"name"</span>: <span class="string">"Tom"</span>, <span class="string">"age"</span>: <span class="number">23</span>&#125;   <span class="comment"># 字典</span></span><br><span class="line">data4 = json.dumps(dict)</span><br><span class="line">print(data4, type(data4))</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"test.json"</span>, <span class="string">"w"</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    <span class="comment"># indent 超级好用，格式化保存字典，默认为None，小于0为零个空格</span></span><br><span class="line">    f.write(json.dumps(dict, indent=<span class="number">4</span>))</span><br><span class="line">    json.dump(dict, f, indent=<span class="number">4</span>)  <span class="comment"># 传入文件描述符，和dumps一样的结果</span></span><br></pre></td></tr></table></figure>
+<p>得到的输出结果如下：格式化所有的数据类型为<code>str</code>类型<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[] &lt;class &apos;str&apos;&gt;</span><br><span class="line">2 &lt;class &apos;str&apos;&gt;</span><br><span class="line">&quot;3&quot; &lt;class &apos;str&apos;&gt;</span><br><span class="line">&#123;&quot;name&quot;: &quot;Tom&quot;, &quot;age&quot;: 23&#125; &lt;class &apos;str&apos;&gt;</span><br></pre></td></tr></table></figure></p>
+<p><code>test.json</code>中的内容<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;name&quot;: &quot;Tom&quot;,</span><br><span class="line">    &quot;age&quot;: 23</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="load和loads-1"><a href="#load和loads-1" class="headerlink" title="load和loads"></a>load和loads</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">dict = <span class="string">'&#123;"name": "Tom", "age": 23&#125;'</span>   <span class="comment"># 将字符串还原为dict</span></span><br><span class="line">data1 = json.loads(dict)</span><br><span class="line">print(data1, type(data1))</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"test.json"</span>, <span class="string">"r"</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    data2 = json.loads(f.read())    <span class="comment"># load的传入参数为字符串类型</span></span><br><span class="line">    print(data2, type(data2))</span><br><span class="line">    f.seek(<span class="number">0</span>)                       <span class="comment"># 将文件游标移动到文件开头位置</span></span><br><span class="line">    data3 = json.load(f)</span><br><span class="line">    print(data3, type(data3))</span><br></pre></td></tr></table></figure>
+<p>运行结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;&apos;name&apos;: &apos;Tom&apos;, &apos;age&apos;: 23&#125; &lt;class &apos;dict&apos;&gt;</span><br><span class="line">&#123;&apos;name&apos;: &apos;Tom&apos;, &apos;age&apos;: 23&#125; &lt;class &apos;dict&apos;&gt;</span><br><span class="line">&#123;&apos;name&apos;: &apos;Tom&apos;, &apos;age&apos;: 23&#125; &lt;class &apos;dict&apos;&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="常见的错误："><a href="#常见的错误：" class="headerlink" title="常见的错误："></a>常见的错误：</h2><h3 id="读取多行的JSON文件"><a href="#读取多行的JSON文件" class="headerlink" title="读取多行的JSON文件"></a>读取多行的JSON文件</h3><p>假如要读取一个多行的JSON文件：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"坂"</span>: [<span class="string">"坂5742"</span>]&#125;</span><br><span class="line">&#123;<span class="attr">"构"</span>: [<span class="string">"构6784"</span>]&#125;</span><br><span class="line">&#123;<span class="attr">"共"</span>: [<span class="string">"共5171"</span>]&#125;</span><br><span class="line">&#123;<span class="attr">"钩"</span>: [<span class="string">"钩94a9"</span>]&#125;</span><br><span class="line">&#123;<span class="attr">"肮"</span>: [<span class="string">"肮80ae"</span>]&#125;</span><br><span class="line">&#123;<span class="attr">"孤"</span>: [<span class="string">"孤5b64"</span>]&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果直接使用：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(json_path, <span class="string">'r'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    json_data = json.load(f)</span><br></pre></td></tr></table></figure></p>
+<p>就会报错：抛出异常<code>JSONDecodeError</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">json.decoder.JSONDecodeError: Extra data: line 2 column 1 (char 17)</span><br></pre></td></tr></table></figure></p>
+<p>表示数据错误，数据太多，第2行第一列<br>因为<code>json</code>只能读取一个文档对象，有两个解决办法<br>1、单行读取文件,一次读取一行文件。<br>2、保存数据源的时候，格式写为一个对象。</p>
+<h4 id="单行读取文件："><a href="#单行读取文件：" class="headerlink" title="单行读取文件："></a>单行读取文件：</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(json_path, <span class="string">'r'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> f.readlines():</span><br><span class="line">        json_data = json.loads(line)</span><br></pre></td></tr></table></figure>
+<p>但是这种做法还有个问题，如果JSON文件中包含空行，还是会抛出<code>JSONDecodeError</code>异常<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">json.decoder.JSONDecodeError: Expecting value: line 2 column 1 (char 1)</span><br></pre></td></tr></table></figure></p>
+<p>可以先处理空行，再进行文件读取操作：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">for line in f.readlines():</span><br><span class="line">       line = line.strip()   # 使用strip函数去除空行</span><br><span class="line">       if len(line) != 0:</span><br><span class="line">           json_data = json.loads(line)</span><br></pre></td></tr></table></figure></p>
+<h4 id="合并为一个对象"><a href="#合并为一个对象" class="headerlink" title="合并为一个对象"></a>合并为一个对象</h4><p>将<code>json</code>文件处理成一个对象文件。<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"dict"</span>: [</span><br><span class="line">&#123;<span class="attr">"坂"</span>: [<span class="string">"坂5742"</span>]&#125;,</span><br><span class="line">&#123;<span class="attr">"构"</span>: [<span class="string">"构6784"</span>]&#125;,</span><br><span class="line">&#123;<span class="attr">"共"</span>: [<span class="string">"共5171"</span>]&#125;,</span><br><span class="line">&#123;<span class="attr">"钩"</span>: [<span class="string">"钩94a9"</span>]&#125;,</span><br><span class="line">&#123;<span class="attr">"肮"</span>: [<span class="string">"肮80ae"</span>]&#125;,</span><br><span class="line">&#123;<span class="attr">"孤"</span>: [<span class="string">"孤5b64"</span>]&#125;</span><br><span class="line">]&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后再用：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(json_path, <span class="string">'r'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    json_data = json.loads(f.read())</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><p><code>json.dumps</code>  将 Python 对象编码成 JSON 字符串<br><code>json.loads</code>  将已编码的 JSON 字符串解码为 Python 对象<br><code>json.dump</code>和<code>json.load</code>,需要传入文件描述符，加上文件操作。<br><code>JSON</code>内部的格式要注意，一个好的格式能够方便读取，可以用<code>indent</code>格式化。</p>
+<h2 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h2><p><a href="https://docs.python.org/3.6/library/json.html#py-to-json-table" target="_blank" rel="noopener">https://docs.python.org/3.6/library/json.html#py-to-json-table</a><br><a href="https://www.cnblogs.com/tjuyuan/p/6795860.html" target="_blank" rel="noopener">https://www.cnblogs.com/tjuyuan/p/6795860.html</a><br><a href="http://liuzhijun.iteye.com/blog/1859857" target="_blank" rel="noopener">http://liuzhijun.iteye.com/blog/1859857</a><br><a href="https://blog.csdn.net/qq_22073849/article/details/78192289" target="_blank" rel="noopener">https://blog.csdn.net/qq_22073849/article/details/78192289</a><br><a href="http://www.runoob.com/python3/python3-json.html" target="_blank" rel="noopener">http://www.runoob.com/python3/python3-json.html</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/JSON/" rel="tag"># JSON</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/17/Hexo版本升级和Next主题升级之坑/" rel="next" title="Hexo版本升级和Next主题升级之坑">
+                <i class="fa fa-chevron-left"></i> Hexo版本升级和Next主题升级之坑
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://onmalbkeh.bkt.clouddn.com/20170305175657_GF3um.jpg"
+                alt="Para" />
+            
+              <p class="site-author-name" itemprop="name">Para</p>
+              <p class="site-description motion-element" itemprop="description">记录生活和学习的点滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/whjkm" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://weibo.com/u/2841022970" target="_blank" title="Weibo"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.douban.com/people/67676061/" target="_blank" title="Douban"><i class="fa fa-fw fa-heart"></i>Douban</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://blog.csdn.net/whjkm" target="_blank" title="CSDN"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://music.163.com/#/user/home?id=18805992" target="_blank" title="CloudMusic"><i class="fa fa-fw fa-music"></i>CloudMusic</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#dump和dumps"><span class="nav-number">1.</span> <span class="nav-text">dump和dumps</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dump函数："><span class="nav-number">1.1.</span> <span class="nav-text">dump函数：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dumps函数："><span class="nav-number">1.2.</span> <span class="nav-text">dumps函数：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#load和loads"><span class="nav-number">2.</span> <span class="nav-text">load和loads</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#load函数："><span class="nav-number">2.1.</span> <span class="nav-text">load函数：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#loads函数："><span class="nav-number">2.2.</span> <span class="nav-text">loads函数：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#格式转化表"><span class="nav-number">3.</span> <span class="nav-text">格式转化表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实例："><span class="nav-number">4.</span> <span class="nav-text">实例：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dump和dumps-1"><span class="nav-number">4.1.</span> <span class="nav-text">dump和dumps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#load和loads-1"><span class="nav-number">4.2.</span> <span class="nav-text">load和loads</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见的错误："><span class="nav-number">5.</span> <span class="nav-text">常见的错误：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#读取多行的JSON文件"><span class="nav-number">5.1.</span> <span class="nav-text">读取多行的JSON文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#单行读取文件："><span class="nav-number">5.1.1.</span> <span class="nav-text">单行读取文件：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#合并为一个对象"><span class="nav-number">5.1.2.</span> <span class="nav-text">合并为一个对象</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结："><span class="nav-number">6.</span> <span class="nav-text">总结：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考链接："><span class="nav-number">7.</span> <span class="nav-text">参考链接：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Para</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Mist</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'whjkm',
+            repo: 'whjkm.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '13f9ca22b3b0f4fb90efddf8bc9ba6b2a46a8439',
+            
+                client_id: '714965cedbb13275b08e'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
