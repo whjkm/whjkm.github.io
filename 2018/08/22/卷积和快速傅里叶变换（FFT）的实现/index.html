@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="卷积运算卷积可以说是图像处理中最基本的操作。线性滤波通过不同的卷积核，可以产生很多不同的效果。假如有一个要处理的二维图像，通过二维的滤波矩阵（卷积核），对于图像的每一个像素点，计算它的领域像素和滤波器矩阵的对应元素的乘积，然后累加，作为该像素位置的值。关于图像卷积和滤波的一些知识点可以参考这篇博客。 下面是通过python模拟实现的图像卷积操作，模拟了sobel算子，prewitt算子和拉普拉斯算">
+<meta name="keywords" content="卷积,FFT,傅里叶变换">
+<meta property="og:type" content="article">
+<meta property="og:title" content="卷积和快速傅里叶变换（FFT）的实现">
+<meta property="og:url" content="https://whjkm.github.io/2018/08/22/卷积和快速傅里叶变换（FFT）的实现/index.html">
+<meta property="og:site_name" content="Mars">
+<meta property="og:description" content="卷积运算卷积可以说是图像处理中最基本的操作。线性滤波通过不同的卷积核，可以产生很多不同的效果。假如有一个要处理的二维图像，通过二维的滤波矩阵（卷积核），对于图像的每一个像素点，计算它的领域像素和滤波器矩阵的对应元素的乘积，然后累加，作为该像素位置的值。关于图像卷积和滤波的一些知识点可以参考这篇博客。 下面是通过python模拟实现的图像卷积操作，模拟了sobel算子，prewitt算子和拉普拉斯算">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://dn-whjkm.qbox.me/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2.png">
+<meta property="og:updated_time" content="2018-08-22T11:10:20.012Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="卷积和快速傅里叶变换（FFT）的实现">
+<meta name="twitter:description" content="卷积运算卷积可以说是图像处理中最基本的操作。线性滤波通过不同的卷积核，可以产生很多不同的效果。假如有一个要处理的二维图像，通过二维的滤波矩阵（卷积核），对于图像的每一个像素点，计算它的领域像素和滤波器矩阵的对应元素的乘积，然后累加，作为该像素位置的值。关于图像卷积和滤波的一些知识点可以参考这篇博客。 下面是通过python模拟实现的图像卷积操作，模拟了sobel算子，prewitt算子和拉普拉斯算">
+<meta name="twitter:image" content="https://dn-whjkm.qbox.me/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://whjkm.github.io/2018/08/22/卷积和快速傅里叶变换（FFT）的实现/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>卷积和快速傅里叶变换（FFT）的实现 | Mars</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Mars</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://whjkm.github.io/2018/08/22/卷积和快速傅里叶变换（FFT）的实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Para">
+      <meta itemprop="description" content="记录生活和学习的点滴">
+      <meta itemprop="image" content="http://onmalbkeh.bkt.clouddn.com/20170305175657_GF3um.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mars">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">卷积和快速傅里叶变换（FFT）的实现
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-22 19:09:07 / 修改时间：19:10:20" itemprop="dateCreated datePublished" datetime="2018-08-22T19:09:07+08:00">2018-08-22</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/22/卷积和快速傅里叶变换（FFT）的实现/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/08/22/卷积和快速傅里叶变换（FFT）的实现/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon"
+            >
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="卷积运算"><a href="#卷积运算" class="headerlink" title="卷积运算"></a>卷积运算</h2><p>卷积可以说是图像处理中最基本的操作。线性滤波通过不同的卷积核，可以产生很多不同的效果。假如有一个要处理的二维图像，通过二维的滤波矩阵（卷积核），对于图像的每一个像素点，计算它的领域像素和滤波器矩阵的对应元素的乘积，然后累加，作为该像素位置的值。关于<a href="https://blog.csdn.net/zouxy09/article/details/49080029" target="_blank" rel="noopener">图像卷积和滤波的一些知识点</a>可以参考这篇博客。</p>
+<p>下面是通过python模拟实现的图像卷积操作，模拟了<code>sobel</code>算子，<code>prewitt</code>算子和拉普拉斯算子。python的np包中有<code>convolve</code>函数可以直接调用，<code>scipy</code>中也有<code>scipy.signal.convolve</code>函数可以直接调用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> pylab</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conv</span><span class="params">(image, kernel)</span>:</span></span><br><span class="line">    height, width = image.shape        <span class="comment"># 获取图像的维度</span></span><br><span class="line">    h, w = kernel.shape                 <span class="comment"># 卷积核的维度</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 经过卷积操作后得到的新的图像的尺寸</span></span><br><span class="line">    new_h = height - h + <span class="number">1</span></span><br><span class="line">    new_w = width - w + <span class="number">1</span></span><br><span class="line">    <span class="comment"># 对新的图像矩阵进行初始化</span></span><br><span class="line">    new_image = np.zeros((new_h, new_w), dtype=np.float)     </span><br><span class="line"></span><br><span class="line">    <span class="comment"># 进行卷积操作，矩阵对应元素值相乘</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(new_w):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(new_h):</span><br><span class="line">            new_image[i, j] = np.sum(image[i:i+h, j:j+w] * kernel)    <span class="comment"># 矩阵元素相乘累加</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 去掉矩阵乘法后的小于0的和大于255的原值，重置为0和255</span></span><br><span class="line">    <span class="comment"># 用clip函数处理矩阵的元素，使元素值处于（0，255）之间</span></span><br><span class="line">    new_image = new_image.clip(<span class="number">0</span>, <span class="number">255</span>)   </span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将新图像各元素的值四舍五入，然后转成8位无符号整型</span></span><br><span class="line">    new_image = np.rint(new_image).astype(<span class="string">'uint8'</span>)     </span><br><span class="line">    <span class="keyword">return</span> new_image</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读取图像信息，并转换为numpy下的数组</span></span><br><span class="line">    image = Image.open(<span class="string">"图片.jpg"</span>, <span class="string">'r'</span>)</span><br><span class="line">    output_path = <span class="string">"./outputPic/"</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(output_path):</span><br><span class="line">        os.mkdir(output_path)</span><br><span class="line">    a = np.array(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sobel 算子</span></span><br><span class="line">    sobel_x = np.array(([<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">                        [<span class="number">-2</span>, <span class="number">0</span>, <span class="number">2</span>],</span><br><span class="line">                        [<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>]))</span><br><span class="line">    sobel_y = np.array(([<span class="number">-1</span>, <span class="number">-2</span>, <span class="number">-1</span>],</span><br><span class="line">                        [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">                        [<span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>]))</span><br><span class="line">    sobel = np.array(([<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">0</span>],</span><br><span class="line">                      [<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">                      [<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># prewitt各个方向上的算子</span></span><br><span class="line">    prewitt_x = np.array(([<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">                          [<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">                          [<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>]))</span><br><span class="line">    prewitt_y = np.array(([<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>],</span><br><span class="line">                          [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">                          [<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]))</span><br><span class="line">    prewitt = np.array(([<span class="number">-2</span>, <span class="number">-1</span>, <span class="number">0</span>],</span><br><span class="line">                        [<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">                        [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 拉普拉斯算子</span></span><br><span class="line">    laplacian = np.array(([<span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>],</span><br><span class="line">                          [<span class="number">-1</span>, <span class="number">4</span>, <span class="number">-1</span>],</span><br><span class="line">                          [<span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>]))</span><br><span class="line">    laplacian_2 = np.array(([<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>],</span><br><span class="line">                            [<span class="number">-1</span>, <span class="number">8</span>, <span class="number">-1</span>],</span><br><span class="line">                            [<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>]))</span><br><span class="line"></span><br><span class="line">    kernel_list = (<span class="string">"sobel_x"</span>, <span class="string">"sobel_y"</span>, <span class="string">"sobel"</span>, <span class="string">"prewitt_x"</span>, <span class="string">"prewitt_y"</span>, <span class="string">"prewitt"</span>, <span class="string">"laplacian"</span>, <span class="string">"laplacian_2"</span>)</span><br><span class="line"></span><br><span class="line">    print(<span class="string">"Gridient detection\n"</span>)</span><br><span class="line">    <span class="keyword">for</span> w <span class="keyword">in</span> kernel_list:</span><br><span class="line">        print(<span class="string">"starting %s....."</span> % w)</span><br><span class="line">        print(<span class="string">"kernel:\n"</span>)</span><br><span class="line">        print(<span class="string">"R\n"</span>)</span><br><span class="line">        R = conv(a[:, :, <span class="number">0</span>], eval(w))</span><br><span class="line">        print(<span class="string">"G\n"</span>)</span><br><span class="line">        G = conv(a[:, :, <span class="number">1</span>], eval(w))</span><br><span class="line">        print(<span class="string">"B\n"</span>)</span><br><span class="line">        B = conv(a[:, :, <span class="number">2</span>], eval(w))</span><br><span class="line"></span><br><span class="line">        I = np.stack((R, G, B), axis=<span class="number">2</span>)     <span class="comment"># 合并三个通道的结果</span></span><br><span class="line">        Image.fromarray(I).save(<span class="string">"%s//bigger-%s.jpg"</span> % (output_path, w))</span><br></pre></td></tr></table></figure>
+<h2 id="快速傅里叶变换（FFT）"><a href="#快速傅里叶变换（FFT）" class="headerlink" title="快速傅里叶变换（FFT）"></a>快速傅里叶变换（FFT）</h2><p>通过上面的方法实现卷积操作之后，发现可以通过快速傅里叶变换提升卷积运算的效率。python提供了很多标准工具和封装来计算它。<code>NumPy</code> 和 <code>SciPy</code> 都有经过充分测试的封装好的FFT库，分别位于子模块 <code>numpy.fft</code> 和 <code>scipy.fftpack</code> 。有关FFT算法的原理和推导可以参见参考链接的博客。</p>
+<h3 id="离散傅里叶变换"><a href="#离散傅里叶变换" class="headerlink" title="离散傅里叶变换"></a>离散傅里叶变换</h3><p><img src="https://dn-whjkm.qbox.me/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2.png" alt="离散的傅里叶变换"></p>
+<p>xn 到 Xk 的转化就是空域到频域的转换，转化为点值表示法。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">DFT_slow</span><span class="params">(x)</span>:</span></span><br><span class="line">    <span class="comment"># Compute the discrete Fourier Transform of the 1D array x</span></span><br><span class="line">    x = np.asarray(x, dtype=float)              <span class="comment"># 转化为ndarray</span></span><br><span class="line">    N = x.shape[<span class="number">0</span>]                              <span class="comment"># 维度</span></span><br><span class="line">    n = np.arange(N)                            <span class="comment"># 0~N组成一个一维向量</span></span><br><span class="line">    k = n.reshape((N, <span class="number">1</span>))                       <span class="comment"># 转换为一个N维向量</span></span><br><span class="line">    M = np.exp(<span class="number">-2j</span> * np.pi * k * n / N)         <span class="comment"># 离散傅里叶公式 -2j复数表示</span></span><br><span class="line">    <span class="keyword">return</span> np.dot(M, x)</span><br></pre></td></tr></table></figure></p>
+<h3 id="快速傅里叶变换"><a href="#快速傅里叶变换" class="headerlink" title="快速傅里叶变换"></a>快速傅里叶变换</h3><p>离散傅里叶变换具有对称性，利用这种对称性，可以推出递归的快速傅里叶算法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">def FFT(x):</span><br><span class="line">    # A recursive implementation of the 1D Cooley-Tukey FFT</span><br><span class="line">    x = np.asarray(x, dtype=float)                 # 浅拷贝</span><br><span class="line">    N = x.shape[0]</span><br><span class="line"></span><br><span class="line">    if N % 2 &gt; 0:</span><br><span class="line">        raise ValueError(&quot;size of x must be a power of 2&quot;)</span><br><span class="line">    elif N &lt;= 32:</span><br><span class="line">        return DFT_slow(x)</span><br><span class="line">    else:</span><br><span class="line">        X_even = FFT(x[::2])          # 从0开始，2为间隔</span><br><span class="line">        X_odd = FFT(x[1::2])          # 从1开始，2为间隔</span><br><span class="line">        factor = np.exp(-2j * np.pi * np.arange(N) / N)</span><br><span class="line">        &apos;&apos;&apos;</span><br><span class="line">        使用/会出现下面的错误，改为// 向下取整</span><br><span class="line">        TypeError: slice indices must be integers or None or have an __index__ method</span><br><span class="line">        &apos;&apos;&apos;</span><br><span class="line">        return np.concatenate([X_even + factor[:N // 2] * X_odd,</span><br><span class="line">                               X_even + factor[N // 2:] * X_odd])</span><br></pre></td></tr></table></figure></p>
+<h3 id="向量化的FFT"><a href="#向量化的FFT" class="headerlink" title="向量化的FFT"></a>向量化的FFT</h3><p>使用numpy进行矩阵向量化。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">FFT_vectorized</span><span class="params">(x)</span>:</span></span><br><span class="line">    <span class="comment"># A vectorized, non-recurisive version of the Cooley_Tukey FFT</span></span><br><span class="line">    x = np.asarray(x, dtype=float)</span><br><span class="line">    N = x.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> np.log2(N) % <span class="number">1</span> &gt; <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">"size of x must be a power of 2"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># N_min here is equivalent to the stopping condition above,</span></span><br><span class="line">    <span class="comment"># and should be a power of 2</span></span><br><span class="line">    N_min = min(N, <span class="number">32</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Perform an O[N^2] DFT on all length-N_min sub-problems at once</span></span><br><span class="line">    n = np.arange(N_min)</span><br><span class="line">    k = n[:, <span class="keyword">None</span>]</span><br><span class="line">    M = np.exp(<span class="number">-2j</span> * np.pi * n * k / N_min)</span><br><span class="line">    X = np.dot(M, x.reshape((N_min, <span class="number">-1</span>)))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># build-up each level of the recursive calculation all at once</span></span><br><span class="line">    <span class="keyword">while</span> X.shape[<span class="number">0</span>] &lt; N:</span><br><span class="line">        X_even = X[:, :X.shape[<span class="number">1</span>] // <span class="number">2</span>]</span><br><span class="line">        X_odd = X[:, X.shape[<span class="number">1</span>] // <span class="number">2</span>:]</span><br><span class="line">        factor = np.exp(<span class="number">-1j</span> * np.pi * np.arange(X.shape[<span class="number">0</span>]) / X.shape[<span class="number">0</span>])[:, <span class="keyword">None</span>]</span><br><span class="line">        X = np.vstack([X_even + factor * X_odd,</span><br><span class="line">                       X_even - factor * X_odd])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> X.ravel()     <span class="comment"># 降维</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="用快速傅里叶变换实现卷积"><a href="#用快速傅里叶变换实现卷积" class="headerlink" title="用快速傅里叶变换实现卷积"></a>用快速傅里叶变换实现卷积</h3><p>根据卷积定理，时域上卷积运算对应于频域上的傅里叶变换的乘积。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fft_convolve</span><span class="params">(a, b)</span>:</span></span><br><span class="line">    n = len(a) + len(b) <span class="number">-1</span></span><br><span class="line">    N = <span class="number">2</span> ** (int(np.log2(n))+<span class="number">1</span>)</span><br><span class="line">    A = np.fft.fft(a, N)</span><br><span class="line">    B = np.fft.fft(b, N)</span><br><span class="line">    <span class="keyword">return</span> np.fft.ifft(A*B)[:n]</span><br></pre></td></tr></table></figure></p>
+<p>c++实现的递归版</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FFT</span><span class="params">(Complex* a,<span class="keyword">int</span> len)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(len==<span class="number">1</span>) <span class="keyword">return</span>;</span><br><span class="line">    Complex* a0=<span class="keyword">new</span> Complex[len/<span class="number">2</span>];</span><br><span class="line">    Complex* a1=<span class="keyword">new</span> Complex[len/<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;len;i+=<span class="number">2</span>)&#123;</span><br><span class="line">        a0[i/<span class="number">2</span>]=a[i];</span><br><span class="line">        a1[i/<span class="number">2</span>]=a[i+<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    FFT(a0,len/<span class="number">2</span>);FFT(a1,len/<span class="number">2</span>);</span><br><span class="line">    Complex wn(cos(2*Pi/len),sin(2*Pi/len));</span><br><span class="line">    <span class="function">Complex <span class="title">w</span><span class="params">(<span class="number">1</span>,<span class="number">0</span>)</span></span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;(len/<span class="number">2</span>);i++)&#123;</span><br><span class="line">        a[i]=a0[i]+w*a1[i];</span><br><span class="line">        a[i+len/<span class="number">2</span>]=a0[i]-w*a1[i];</span><br><span class="line">        w=w*wn;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>c++实现的非递归版<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">double</span> PI = <span class="built_in">acos</span>(<span class="number">-1.0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 复数</span></span><br><span class="line"><span class="keyword">struct</span> <span class="keyword">complex</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">double</span> r,i;</span><br><span class="line">    <span class="keyword">complex</span>(<span class="keyword">double</span> _r = <span class="number">0.0</span>, <span class="keyword">double</span> _i = <span class="number">0.0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        r = _r;</span><br><span class="line">        i = _i;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">complex</span> <span class="keyword">operator</span> +(<span class="keyword">const</span> <span class="keyword">complex</span> &amp;b)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">complex</span>(r + b.r, i + b.i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">complex</span> <span class="keyword">operator</span> -(<span class="keyword">const</span> <span class="keyword">complex</span> &amp;b)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">complex</span>(r - b.r, i - b.i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">complex</span> <span class="keyword">operator</span> *(<span class="keyword">const</span> <span class="keyword">complex</span> &amp;b)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">complex</span>(r*b.r - i*b.i, r*b.i + i*b.r);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 雷德算法 -- 倒位序</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Rader</span><span class="params">(<span class="keyword">complex</span> F[], <span class="keyword">int</span> len)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> j = len &gt;&gt; <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;len<span class="number">-1</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(i &lt; j)</span><br><span class="line">            swap(F[i], F[j]);</span><br><span class="line">        <span class="keyword">int</span> k = len &gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(j &gt;= k)</span><br><span class="line">        &#123;</span><br><span class="line">            j -= k;</span><br><span class="line">            k &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(j &lt; k)</span><br><span class="line">            j += k;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FFT</span><span class="params">(<span class="keyword">complex</span> F[], <span class="keyword">int</span> len, <span class="keyword">int</span> on)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Rader(F, len);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> h=<span class="number">2</span>; h&lt;=len; h&lt;&lt;=<span class="number">1</span>)    <span class="comment">//计算长度为h的DFT</span></span><br><span class="line">    &#123;</span><br><span class="line">        complex wn(cos(-on*2*PI/h), sin(-on*2*PI/h));   //单位复根e^(2*PI/m),用欧拉公式展开</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">0</span>; j&lt;len; j+=h)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function"><span class="keyword">complex</span> <span class="title">w</span><span class="params">(<span class="number">1</span>,<span class="number">0</span>)</span></span>;       <span class="comment">//旋转因子</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> k=j; k&lt;j+h/<span class="number">2</span>; k++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">complex</span> u = F[k];</span><br><span class="line">                <span class="keyword">complex</span> t = w * F[k + h/<span class="number">2</span>];</span><br><span class="line">                F[k] = u + t;        <span class="comment">//蝴蝶合并操作</span></span><br><span class="line">                F[k + h/<span class="number">2</span>] = u - t;</span><br><span class="line">                w = w * wn;          <span class="comment">//更新旋转因子</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//求逆傅里叶变换</span></span><br><span class="line">    <span class="keyword">if</span>(on == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;len; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            F[i].r /= len;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//求卷积</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Conv</span><span class="params">(<span class="keyword">complex</span> a[], <span class="keyword">complex</span> b[], <span class="keyword">int</span> len)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    FFT(a, len, <span class="number">1</span>);</span><br><span class="line">    FFT(b, len, <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;len; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        a[i] = a[i] * b[i];         <span class="comment">//卷积定理</span></span><br><span class="line">    &#125;</span><br><span class="line">    FFT(a, len, <span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>参考链接：<br><a href="http://blog.jobbole.com/58246/" target="_blank" rel="noopener">http://blog.jobbole.com/58246/</a>   （快速傅里叶变换）<br><a href="https://blog.csdn.net/acdreamers/article/details/39005227" target="_blank" rel="noopener">https://blog.csdn.net/acdreamers/article/details/39005227</a>  （快速傅里叶变换）<br><a href="http://blog.miskcoo.com/2015/04/polynomial-multiplication-and-fast-fourier-transform#i-15" target="_blank" rel="noopener">http://blog.miskcoo.com/2015/04/polynomial-multiplication-and-fast-fourier-transform#i-15</a>   （快速傅里叶变换）<br><a href="https://blog.csdn.net/WADuan2/article/details/79529900" target="_blank" rel="noopener">https://blog.csdn.net/WADuan2/article/details/79529900</a>   （快速傅里叶变换）<br><a href="https://blog.csdn.net/oliverkingli/article/details/79243731" target="_blank" rel="noopener">https://blog.csdn.net/oliverkingli/article/details/79243731</a>   （图像卷积）<br><a href="https://blog.csdn.net/zlh_hhhh/article/details/75604333" target="_blank" rel="noopener">https://blog.csdn.net/zlh_hhhh/article/details/75604333</a>   （快速傅里叶变换）<br><a href="https://www.cnblogs.com/youmuchen/p/6724780.html" target="_blank" rel="noopener">https://www.cnblogs.com/youmuchen/p/6724780.html</a>  （图像卷积）<br><a href="http://blog.sina.com.cn/s/blog_154d272c90102x98p.html" target="_blank" rel="noopener">http://blog.sina.com.cn/s/blog_154d272c90102x98p.html</a>   （雷德算法）<br><a href="https://www.cnblogs.com/Sakits/p/8405098.html" target="_blank" rel="noopener">https://www.cnblogs.com/Sakits/p/8405098.html</a>  （快速傅里叶变换）</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/卷积/" rel="tag"># 卷积</a>
+          
+            <a href="/tags/FFT/" rel="tag"># FFT</a>
+          
+            <a href="/tags/傅里叶变换/" rel="tag"># 傅里叶变换</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/02/HDU-1005-Number-Sequence（矩阵乘法-快速幂）/" rel="next" title="HDU 1005 Number Sequence（矩阵乘法+快速幂）">
+                <i class="fa fa-chevron-left"></i> HDU 1005 Number Sequence（矩阵乘法+快速幂）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://onmalbkeh.bkt.clouddn.com/20170305175657_GF3um.jpg"
+                alt="Para" />
+            
+              <p class="site-author-name" itemprop="name">Para</p>
+              <p class="site-description motion-element" itemprop="description">记录生活和学习的点滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/whjkm" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://weibo.com/u/2841022970" target="_blank" title="Weibo"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.douban.com/people/67676061/" target="_blank" title="Douban"><i class="fa fa-fw fa-heart"></i>Douban</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://blog.csdn.net/whjkm" target="_blank" title="CSDN"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://music.163.com/#/user/home?id=18805992" target="_blank" title="CloudMusic"><i class="fa fa-fw fa-music"></i>CloudMusic</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#卷积运算"><span class="nav-number">1.</span> <span class="nav-text">卷积运算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#快速傅里叶变换（FFT）"><span class="nav-number">2.</span> <span class="nav-text">快速傅里叶变换（FFT）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#离散傅里叶变换"><span class="nav-number">2.1.</span> <span class="nav-text">离散傅里叶变换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速傅里叶变换"><span class="nav-number">2.2.</span> <span class="nav-text">快速傅里叶变换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#向量化的FFT"><span class="nav-number">2.3.</span> <span class="nav-text">向量化的FFT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用快速傅里叶变换实现卷积"><span class="nav-number">2.4.</span> <span class="nav-text">用快速傅里叶变换实现卷积</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Para</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Mist</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'whjkm',
+            repo: 'whjkm.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '13f9ca22b3b0f4fb90efddf8bc9ba6b2a46a8439',
+            
+                client_id: '714965cedbb13275b08e'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
